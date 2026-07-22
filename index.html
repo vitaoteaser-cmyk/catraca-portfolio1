@@ -180,26 +180,58 @@
   .mech-row .v{font-family:'Bebas Neue';font-size:22px;color:var(--fg);}
   @media (max-width:860px){ .sobre-grid{grid-template-columns:1fr;} }
 
-  /* ---------- PORTFOLIO ---------- */
-  .video-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:22px;
+  /* ---------- PORTFOLIO (carrosséis estilo Netflix) ---------- */
+  .carousel-row{ margin-bottom:56px; }
+  .carousel-row:last-child{ margin-bottom:0; }
+  .carousel-title{
+    font-family:'Bebas Neue';
+    font-size:24px;
+    letter-spacing:.03em;
+    color:var(--fg);
+    margin-bottom:16px;
+    display:flex;align-items:center;gap:10px;
   }
-  @media (max-width:900px){ .video-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:600px){ .video-grid{grid-template-columns:1fr;} }
+  .carousel-title::before{content:'';width:18px;height:2px;background:var(--brass);display:inline-block;}
+
+  .carousel-wrap{ position:relative; }
+  .carousel-track{
+    display:flex;
+    gap:16px;
+    overflow-x:auto;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    padding-bottom:4px;
+  }
+  .carousel-track::-webkit-scrollbar{ display:none; }
+
+  .carousel-arrow{
+    position:absolute;top:0;bottom:4px;
+    width:44px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(to right, var(--bg) 20%, transparent);
+    color:var(--fg);
+    border:none;cursor:pointer;
+    z-index:5;
+    font-size:20px;
+    transition:opacity .25s;
+  }
+  .carousel-arrow.right{ right:0; left:auto; background:linear-gradient(to left, var(--bg) 20%, transparent); }
+  .carousel-arrow:hover{ color:var(--brass-bright); }
+  @media (max-width:700px){ .carousel-arrow{ display:none; } }
 
   .video-card{
     position:relative;
-    aspect-ratio:9/13;
+    flex:0 0 auto;
+    width:min(340px, 78vw);
+    aspect-ratio:16/9;
     background:var(--bg-card);
     border:1px solid var(--line);
     overflow:hidden;
     cursor:pointer;
-    transition:border-color .3s;
+    transition:border-color .3s, transform .3s;
   }
-  .video-card:hover{border-color:var(--brass-dim);}
-  .video-card video, .video-card .poster-fallback, .video-card .yt-thumb{
+  .video-card:hover{border-color:var(--brass-dim); transform:translateY(-4px);}
+  .video-card video, .video-card .poster-fallback, .video-card .yt-thumb, .video-card .capa-img{
     position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   }
   .poster-fallback{
@@ -210,25 +242,25 @@
   .poster-fallback small{font-size:11px;color:var(--fg-dim);line-height:1.5;}
 
   .video-tag{
-    position:absolute;top:14px;left:14px;
+    position:absolute;top:12px;left:12px;
     font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
     background:rgba(10,10,10,.75);
     border:1px solid var(--brass-dim);
     color:var(--brass-bright);
-    padding:6px 10px;
+    padding:5px 9px;
     z-index:2;
   }
   .video-overlay{
     position:absolute;inset:0;
-    background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.1) 45%, transparent 65%);
+    background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.05) 55%, transparent 70%);
     display:flex;align-items:flex-end;
-    padding:18px;
+    padding:14px;
     z-index:1;
   }
-  .video-overlay h3{font-size:22px;color:var(--fg);}
+  .video-overlay h3{font-size:18px;color:var(--fg);}
   .play-icon{
     position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    width:52px;height:52px;border:1.5px solid var(--fg);border-radius:50%;
+    width:44px;height:44px;border:1.5px solid var(--fg);border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     z-index:2;opacity:.9;transition:transform .3s;
   }
@@ -360,10 +392,10 @@
     <div class="section-head">
       <div class="eyebrow">PORTFÓLIO</div>
       <h2>O que já colocamos<br>pra girar.</h2>
-      <p>Uma seleção de produções — cobertura de eventos, ativação de marca e conteúdo institucional. Clique num card pra assistir.</p>
+      <p>Uma seleção de produções organizadas por categoria. Use as setas pra navegar dentro de cada fileira, e clique num card pra assistir.</p>
     </div>
 
-    <div class="video-grid" id="videoGrid"></div>
+    <div id="carouselContainer"></div>
   </div>
 </section>
 
@@ -440,80 +472,125 @@
    2. Coloque na pasta "videos"
    3. Deixe o campo "src" preenchido (já vem assim por padrão)
    ===================================================================== */
+/* =====================================================================
+   COMO ADICIONAR SEUS VÍDEOS
+   ---------------------------------------------------------------------
+   Cada vídeo tem 4 campos:
+
+   - titulo:    nome que aparece no card
+   - categoria: nome da fileira/aba onde ele entra (ex: "Eventos").
+                Vídeos com a mesma categoria ficam juntos na mesma
+                fileira, um do lado do outro, com setas pra navegar.
+   - capa:      imagem de capa, no formato 16:9 (horizontal), tipo
+                Netflix. Coloque o arquivo de imagem (.jpg ou .png)
+                na pasta "videos" e escreva o caminho aqui.
+                Se deixar em branco, usa a miniatura automática
+                (do YouTube) ou um aviso genérico.
+   - src / youtube: preencha SÓ UM dos dois — o vídeo em si
+                (arquivo local em "src", ou ID do YouTube em "youtube")
+
+   Quer mais vídeos na mesma categoria? Copia uma linha inteira e
+   cola embaixo, mudando os campos. A fileira se ajusta sozinha.
+   Quer uma categoria nova? Só usar um nome de categoria diferente.
+   ===================================================================== */
 const VIDEOS = [
-  { titulo: "Cobertura de Evento", categoria: "Eventos",        src: "videos/video-1.mp4", youtube: "PSBbq0-4xow" },
-  { titulo: "Cobertura de Evento", categoria: "Eventos",        src: "videos/video-2.mp4", youtube: "" },
-  { titulo: "Cobertura de Evento", categoria: "Eventos",        src: "videos/video-3.mp4", youtube: "" },
-  { titulo: "Presença Digital",    categoria: "Social Media",   src: "videos/video-4.mp4", youtube: "" },
-  { titulo: "Bastidores",          categoria: "Making Of",      src: "videos/video-5.mp4", youtube: "" },
-  { titulo: "Depoimento",          categoria: "Testemunhal",    src: "videos/video-6.mp4", youtube: "" },
+  { titulo: "Cobertura de Evento", categoria: "Eventos",        capa: "", src: "videos/video-1.mp4", youtube: "PSBbq0-4xow" },
+  { titulo: "Cobertura de Evento", categoria: "Eventos",        capa: "", src: "videos/video-2.mp4", youtube: "" },
+  { titulo: "Cobertura de Evento", categoria: "Eventos",        capa: "", src: "videos/video-3.mp4", youtube: "" },
+  { titulo: "Presença Digital",    categoria: "Social Media",   capa: "", src: "videos/video-4.mp4", youtube: "" },
+  { titulo: "Bastidores",          categoria: "Making Of",      capa: "", src: "videos/video-5.mp4", youtube: "" },
+  { titulo: "Depoimento",          categoria: "Testemunhal",    capa: "", src: "videos/video-6.mp4", youtube: "" },
 ];
 
-const grid = document.getElementById('videoGrid');
+const carouselContainer = document.getElementById('carouselContainer');
 const modal = document.getElementById('modal');
 const modalVideo = document.getElementById('modalVideo');
 const modalYoutube = document.getElementById('modalYoutube');
 
-VIDEOS.forEach((v, i) => {
-  const card = document.createElement('div');
-  card.className = 'video-card';
-  const isYoutube = v.youtube && v.youtube.trim().length > 0;
+// agrupa os vídeos por categoria, mantendo a ordem em que aparecem
+const categorias = [];
+VIDEOS.forEach(v => { if (!categorias.includes(v.categoria)) categorias.push(v.categoria); });
 
-  if (isYoutube) {
+categorias.forEach(cat => {
+  const row = document.createElement('div');
+  row.className = 'carousel-row';
+
+  const track = document.createElement('div');
+  track.className = 'carousel-track';
+
+  VIDEOS.filter(v => v.categoria === cat).forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'video-card';
+    const isYoutube = v.youtube && v.youtube.trim().length > 0;
+
+    let mediaHTML;
+    if (v.capa && v.capa.trim().length > 0) {
+      mediaHTML = `<img class="capa-img" src="${v.capa}" alt="${v.titulo}">`;
+    } else if (isYoutube) {
+      mediaHTML = `<img class="yt-thumb" src="https://img.youtube.com/vi/${v.youtube}/hqdefault.jpg" alt="${v.titulo}">`;
+    } else {
+      mediaHTML = `<video src="${v.src}" muted loop playsinline preload="metadata"></video>
+        <div class="poster-fallback" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M9 9l6 3-6 3V9z" fill="currentColor" stroke="none"/></svg>
+          <small>Coloque o arquivo<br><b>${v.src.split('/').pop()}</b><br>na pasta "videos"</small>
+        </div>`;
+    }
+
     card.innerHTML = `
       <span class="video-tag">${v.categoria}</span>
-      <img class="yt-thumb" src="https://img.youtube.com/vi/${v.youtube}/hqdefault.jpg" alt="${v.titulo}">
+      ${mediaHTML}
       <div class="play-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#f2f0ea"><path d="M8 5v14l11-7z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#f2f0ea"><path d="M8 5v14l11-7z"/></svg>
       </div>
       <div class="video-overlay"><h3>${v.titulo}</h3></div>
     `;
+
+    const vidEl = card.querySelector('video');
+    const fallbackEl = card.querySelector('.poster-fallback');
+    let loaded = true;
+    if (vidEl) {
+      vidEl.addEventListener('error', () => {
+        loaded = false;
+        vidEl.style.display = 'none';
+        if (fallbackEl) fallbackEl.style.display = 'flex';
+      });
+      card.addEventListener('mouseenter', () => { if (loaded && !v.capa) vidEl.play(); });
+      card.addEventListener('mouseleave', () => { if (loaded && !v.capa) { vidEl.pause(); vidEl.currentTime = 0; } });
+    }
+
     card.addEventListener('click', () => {
-      modalVideo.style.display = 'none';
-      modalYoutube.style.display = 'block';
-      modalYoutube.src = `https://www.youtube.com/embed/${v.youtube}?autoplay=1`;
-      modal.classList.add('open');
+      if (isYoutube) {
+        modalVideo.style.display = 'none';
+        modalYoutube.style.display = 'block';
+        modalYoutube.src = `https://www.youtube.com/embed/${v.youtube}?autoplay=1`;
+        modal.classList.add('open');
+      } else {
+        if (!loaded) return;
+        modalYoutube.style.display = 'none';
+        modalVideo.style.display = 'block';
+        modalVideo.src = v.src;
+        modal.classList.add('open');
+        modalVideo.play();
+      }
     });
-    grid.appendChild(card);
-    return;
-  }
 
-  card.innerHTML = `
-    <span class="video-tag">${v.categoria}</span>
-    <video src="${v.src}" muted loop playsinline preload="metadata"></video>
-    <div class="poster-fallback" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M9 9l6 3-6 3V9z" fill="currentColor" stroke="none"/></svg>
-      <small>Coloque o arquivo<br><b>${v.src.split('/').pop()}</b><br>na pasta "videos"</small>
-    </div>
-    <div class="play-icon">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#f2f0ea"><path d="M8 5v14l11-7z"/></svg>
-    </div>
-    <div class="video-overlay"><h3>${v.titulo}</h3></div>
-  `;
-
-  const vidEl = card.querySelector('video');
-  const fallbackEl = card.querySelector('.poster-fallback');
-  let loaded = true;
-
-  vidEl.addEventListener('error', () => {
-    loaded = false;
-    vidEl.style.display = 'none';
-    fallbackEl.style.display = 'flex';
+    track.appendChild(card);
   });
 
-  card.addEventListener('click', () => {
-    if (!loaded) return;
-    modalYoutube.style.display = 'none';
-    modalVideo.style.display = 'block';
-    modalVideo.src = v.src;
-    modal.classList.add('open');
-    modalVideo.play();
-  });
+  const wrap = document.createElement('div');
+  wrap.className = 'carousel-wrap';
+  wrap.innerHTML = `<button class="carousel-arrow left">‹</button><button class="carousel-arrow right">›</button>`;
+  wrap.prepend(track);
 
-  card.addEventListener('mouseenter', () => { if (loaded) vidEl.play(); });
-  card.addEventListener('mouseleave', () => { if (loaded) { vidEl.pause(); vidEl.currentTime = 0; } });
+  row.innerHTML = `<div class="carousel-title">${cat}</div>`;
+  row.appendChild(wrap);
+  carouselContainer.appendChild(row);
 
-  grid.appendChild(card);
+  const leftBtn = wrap.querySelector('.left');
+  const rightBtn = wrap.querySelector('.right');
+  const scrollAmount = () => track.clientWidth * 0.8;
+  leftBtn.addEventListener('click', () => track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }));
+  rightBtn.addEventListener('click', () => track.scrollBy({ left: scrollAmount(), behavior: 'smooth' }));
 });
 
 document.getElementById('modalClose').addEventListener('click', closeModal);
